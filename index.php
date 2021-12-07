@@ -1,10 +1,10 @@
 <?php
 
-require 'vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-require 'lib/src/loader.php';
+require __DIR__.'/lib/src/loader.php';
 
-require 'app/loader.php';
+require __DIR__.'/app/loader.php';
 
 $bot = new \app\Bot(getenv('TOKEN'));
 
