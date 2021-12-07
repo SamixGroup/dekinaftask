@@ -9,3 +9,5 @@ require 'app/loader.php';
 $bot = new \app\Bot(getenv('TOKEN'));
 
 $bot->onText('\/start',\app\HandleStart::class);
+
+$bot->webhook();
