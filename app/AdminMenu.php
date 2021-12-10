@@ -31,7 +31,6 @@ class AdminMenu extends \lib\CallbackHandler
                 $this->api->send_message($user_id, 'Введите имя модератора:', $this->api->callback_keyboard(['Отменить'], ['admin_menu back']));
                 User::set_state_byId($user_id, 'admin+add_moder+name');
                 break;
-
             case (bool)preg_match('#delete_moderator#', $operation):
                 if ($operation != 'delete_moderator') {
                     $moder_id = (int)str_replace('delete_moderator.', '', $operation);
@@ -39,6 +38,21 @@ class AdminMenu extends \lib\CallbackHandler
                     $this->api->answer_callback_query($callback['id'], "Модератор успешно удалён");
                 }
                 $this->list_moders_delete($callback);
+                break;
+
+            case (bool)preg_match('#edit_moderator#', $operation):
+                if ($operation != 'edit_moderator') {
+                    $this->api->delete_message($user_id, $message_id);
+                    $moder_id = (int)str_replace('edit_moderator.', '', $operation);
+                    $this->api->send_message(
+                        $user_id,
+                        "Введите новое имя модератора",
+                        $this->api->callback_keyboard(['Отменить'], ['admin_menu back'])
+                    );
+                    User::set_state_byId($user_id, 'admin+edit_moder+id|' . $moder_id);
+
+                }
+                $this->list_moders_edit($callback);
                 break;
 
             case 'reviews':
@@ -85,6 +99,27 @@ class AdminMenu extends \lib\CallbackHandler
         $data[1][] = 'admin_menu back';
         $keyboard = $this->api->callback_keyboard($data[0], $data[1]);
         $this->api->edit_message_text($user_id, $message_id, "Выберите модератора для удаления", $keyboard);
+    }
+
+    function list_moders_edit($callback)
+    {
+        $user_id = $callback['from']['id'];
+        $message_id = $callback['message']['message_id'];
+        $moderators = DB::get_moders();
+        if (empty($moderators)) {
+            $this->api->delete_message($user_id, $message_id);
+            $this->api->send_message($user_id, "Нет модераторов для изменения", $this->api->admin_menu());
+            return $this->api->answer_callback_query($callback['id'], "Модераторов для изменения нет!");
+        }
+        $data = [[], []];
+        foreach ($moderators as $moder) {
+            $data[0][] = $moder['name'];
+            $data[1][] = 'admin_menu edit_moderator.' . $moder['user_id'];
+        }
+        $data[0][] = "Главное меню";
+        $data[1][] = 'admin_menu back';
+        $keyboard = $this->api->callback_keyboard($data[0], $data[1]);
+        $this->api->edit_message_text($user_id, $message_id, "Выберите модератора для изменения", $keyboard);
     }
 
     function list_moders_review($callback)

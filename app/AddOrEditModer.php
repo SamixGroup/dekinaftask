@@ -32,10 +32,24 @@ class AddOrEditModer extends TextHandler
                         $this->api->send_message(
                             $user_id,
                             "Admin",
-                            $this->api->callback_keyboard(['Moderators', 'Feedbacks'], ['admin_menu moderators', 'admin_menu feedbacks'], 2)
+                            $this->api->admin_menu()
                         );
                         break;
-
+                }
+                break;
+            case 'edit_moder':
+                $step = explode('+', $state)[2];
+                switch ($step) {
+                    case (bool)preg_match('#id\|#', $step):
+                        $moder_id = str_replace('id|', '', $step);
+                        DB::save_moder($text, (int)($moder_id));
+                        User::set_state_byId($user_id);
+                        $this->api->send_message(
+                            $user_id,
+                            "Изменения сохранены",
+                            $this->api->admin_menu()
+                        );
+                        break;
                 }
                 break;
         }

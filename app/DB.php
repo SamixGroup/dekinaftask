@@ -28,7 +28,7 @@ class DB
     public static function save_moder($name, $id)
     {
         $name = self::$connection->real_escape_string($name);
-        if ((new User($id))->get_role()) return self::$connection->query("update `" . self::$table . "` set `role`=2 `name`={$name} where `user_id`=$id");
+        if ((new User($id))->get_role()) return self::$connection->query("update `" . self::$table . "` set `role`=2, `name`='{$name}' where `user_id`=$id");
         return self::$connection->query("insert into `" . self::$table . "` (`user_id`,`name`,`role`) values ($id,'$name',2)");
     }
 
@@ -107,6 +107,8 @@ class DB
         $sql = "select * from " . self::$table . " where role=2";
         return self::$connection->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
+
+
 
     static function delete_moder($moder_id)
     {
